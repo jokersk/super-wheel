@@ -1,6 +1,11 @@
 export default class SuperWheel {
-    constructor(root) {
+    constructor(root, trap) {
         this.root = root
+        const trapRect = trap.getBoundingClientRect()
+        this.trap = {
+            top: trapRect.top,
+            height: trapRect.height
+        }
 
         this.setupRoot()
 
@@ -61,41 +66,37 @@ export default class SuperWheel {
     }
 
     fade(someEl) {
-        const fadeEl = new FadeElment(someEl)
+        const fadeEl = new FadeElment(someEl, this.trap)
         this.fadeElements.push(fadeEl)
         return fadeEl
     }
 }
 
 class FadeElment {
-    constructor(el) {
-        const selfRect = el.getBoundingClientRect()
+    constructor(el, trap) {
         const parent = el.parentNode
-        const parentRect = parent.getBoundingClientRect()
-        const translateY = ((parentRect.height + selfRect.height) / 2) * -1
         parent.style.overflow = 'hidden'
         parent.style.position = 'relative'
-        this.parentHeight = parentRect.height
+        this.trap = trap
         this.el = el
-        this.parentTop = parentRect.top
-        this.height = selfRect.height
-        this.translateY = translateY
-        this.top = selfRect.top + translateY
-        this.el.style.transform = `translateY(${this.translateY}px)`
+        const oldStyle = this.el.style
+        this.el.style.display = 'none'
+        setTimeout(() => {
+            this.el.setAttribute('style', oldStyle)
+            this.top = el.getBoundingClientRect().top
+            this.translateY = this.trap.top - this.top 
+            this.el.style.transform = `translateY(${this.translateY}px)`
+        })
         this.callbacks = []
-        // -100 : -400, -200: -300, -300: -200, -400 : -100,
-        // -250 : 150 : -250
     }
 
     update(scrollTop) {
-        const abs = Math.abs
-        const currentParentTop = this.parentTop - abs(scrollTop)
-        console.log(currentParentTop)
-        this.el.style.transform = `translateY(${-currentParentTop}px)`
+        const y = this.trap.top - ( this.top + scrollTop )
+        this.el.style.transform = `translateY(${y}px)`
 
-        /* for(const callback of this.callbacks) {
-            callback(1)
-        } */
+        for(const callback of this.callbacks) {
+            callback(y - this.translateY)
+        }
     }
 
     onUpdate(callback) {
