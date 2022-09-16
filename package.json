@@ -1,0 +1,29 @@
+{
+  "name": "super-wheel",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/super-wheel.esm.js",
+  "scripts": {
+    "dev": "vite serve play --config vite.config.ts",
+    "build": "vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^3.1.0",
+    "vite": "^3.1.0"
+  },
+  "prettier": {
+    "semi": false,
+    "printWidth": 120,
+    "tabWidth": 4,
+    "singleQuote": true,
+    "trailingComma": "none",
+    "arrowParens": "avoid"
+  },
+  "dependencies": {
+    "vue": "^3.2.39"
+  }
+}
