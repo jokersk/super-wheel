@@ -101,13 +101,13 @@ export const scrollEffect = (cb?: Function | null) => {
             },
             fadeIn(onFadeIn?: Function) {
                 this.lastRange.callback = (ratio: number) => {
-                    cb && cb(ratio)
-                    onFadeIn && onFadeIn(ratio)
+                    cb && cb(ratio, { is })
+                    onFadeIn && onFadeIn(ratio, { is })
                 }
                 return this
             },
             fadeOut(onFadeOut?: Function) {
-                this.lastRange.callback = (ratio: number)=> {
+                this.lastRange.callback = (ratio: number) => {
                     const payload: number = +(1 - ratio).toFixed(2)
                     cb && cb(payload)
                     onFadeOut && onFadeOut(payload)
@@ -157,7 +157,18 @@ export const scrollEffect = (cb?: Function | null) => {
     return initHandler()
 }
 
-const sizeMap = {
+export type SizeMap = {
+    default: number
+    sm: number
+    md: number
+    lg: number
+    xl: number
+    '2xl': number
+}
+
+export const is = (size: keyof SizeMap): boolean => window.innerWidth >= sizeMap[size]
+
+export const sizeMap: SizeMap = {
     default: 0,
     sm: 640,
 

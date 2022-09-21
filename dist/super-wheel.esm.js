@@ -1,4 +1,4 @@
-const w = function(s) {
+const m = function(s) {
   s.target.hasAttribute("super:ignore") || (s.preventDefault(), s.stopPropagation(), !(s.touches.length > 1) && (this.touch.canAnimate = !1, this.touch.speed = 0, this.touch.startY = s.touches[0].clientY, this.touch.lastX = s.touches[0].clientX, this.touch.lastY = this.touch.startY, this.touch.startAt = s.timeStamp));
 }, v = function(s) {
   if (s.touches.length > 1)
@@ -16,12 +16,12 @@ const w = function(s) {
     return;
   i > t && (i = t), i < -t && (i = -t);
   let e = 0, o = 0;
-  function h(n, l, r, p) {
-    return r * ((n = n / p - 1) * n * n + 1) + l;
+  function h(n, l, a, p) {
+    return a * ((n = n / p - 1) * n * n + 1) + l;
   }
-  const a = 100, u = () => {
-    const n = h(e, 0, i, a);
-    this.move(n - o), o = n, e += 1, e < a && this.touch.canAnimate && requestAnimationFrame(u);
+  const r = 100, u = () => {
+    const n = h(e, 0, i, r);
+    this.move(n - o), o = n, e += 1, e < r && this.touch.canAnimate && requestAnimationFrame(u);
   };
   requestAnimationFrame(u);
 }, k = function(s) {
@@ -40,8 +40,8 @@ const b = () => ({
   clear() {
     g = [];
   }
-}), C = (s, t, i) => (100 / (t - s) * (i - s) / 100).toFixed(6), d = () => {
-}, Y = (s) => (() => {
+}), H = (s, t, i) => (100 / (t - s) * (i - s) / 100).toFixed(6), f = () => {
+}, C = (s) => (() => {
   const i = {
     ranges: [],
     otherwises: [],
@@ -52,17 +52,17 @@ const b = () => ({
       if (!e.hasOwnProperty("default"))
         throw "responsive must has default key";
       const o = e;
-      let h = e.default[0], a = e.default[1];
-      for (const n of Object.keys(f).reverse())
-        if (n in e && window.innerWidth >= f[n]) {
-          h = e[n][0], a = e[n][1];
+      let h = e.default[0], r = e.default[1];
+      for (const n of Object.keys(d).reverse())
+        if (n in e && window.innerWidth >= d[n]) {
+          h = e[n][0], r = e[n][1];
           break;
         }
-      h === "auto" && (h = this.lastRange.end), typeof a == "string" && a.includes("+") && (a = h + parseFloat(a.slice(1)));
+      h === "auto" && (h = this.lastRange.end), typeof r == "string" && r.includes("+") && (r = h + parseFloat(r.slice(1)));
       const u = {
         start: h,
-        end: a,
-        callback: d,
+        end: r,
+        callback: f,
         responsive: o
       };
       this.ranges.push(u);
@@ -74,14 +74,14 @@ const b = () => ({
       const h = {
         start: e,
         end: o,
-        callback: d,
+        callback: f,
         responsive: null
       };
       return this.ranges.push(h), this;
     },
     once(e) {
       let o = () => {
-        o = d, e();
+        o = f, e();
       };
       return this.lastRange.callback = () => o(), this;
     },
@@ -89,8 +89,11 @@ const b = () => ({
       return this.lastRange.callback = e, this;
     },
     fadeIn(e) {
-      return this.lastRange.callback = (o) => {
-        s && s(o), e && e(o);
+      const o = {
+        is: (h) => window.innerWidth >= d[h]
+      };
+      return this.lastRange.callback = (h) => {
+        s && s(h, o), e && e(h, o);
       }, this;
     },
     fadeOut(e) {
@@ -105,26 +108,26 @@ const b = () => ({
   };
   return b().listen(({ process: e, value: o }) => {
     let h = () => i.otherwises.forEach((n) => n());
-    const a = (n, l) => {
-      for (const r of Object.keys(f).reverse())
-        if (n.responsive[r] && window.innerWidth >= f[r])
-          return l(n.responsive[r][0], n.responsive[r][1]);
-    }, u = (n) => (l, r) => {
-      if (e > l && e <= r)
-        return n(l, r, e);
+    const r = (n, l) => {
+      for (const a of Object.keys(d).reverse())
+        if (n.responsive[a] && window.innerWidth >= d[a])
+          return l(n.responsive[a][0], n.responsive[a][1]);
+    }, u = (n) => (l, a) => {
+      if (e > l && e <= a)
+        return n(l, a, e);
     };
     i.ranges.forEach((n) => {
-      let l = u((r, p, m) => {
-        n.callback(C(r, p, m), { process: m, value: o }), h = d;
+      let l = u((a, p, w) => {
+        n.callback(H(a, p, w), { process: w, value: o }), h = f;
       });
       if (n.responsive) {
-        a(n, l);
+        r(n, l);
         return;
       }
       l(n.start, n.end);
     }), h();
   }), i;
-})(), f = {
+})(), d = {
   default: 0,
   sm: 640,
   md: 768,
@@ -151,7 +154,7 @@ class c {
     t.setAttribute("style", "position: fixed; bottom: 0; right: 0; color: white; background: black; z-index: 999"), document.body.appendChild(t), c.debugEl = t, c.updateDebug();
   }
   static updateDebug() {
-    this.debugEl && (this.debugEl.textContent = c.getInstance().process.toFixed(5));
+    this.debugEl && (this.debugEl.textContent = c.getInstance().process.toFixed(3));
   }
   static getInstance() {
     if (!c.instance)
@@ -165,19 +168,20 @@ class c {
   static in(...t) {
     const i = t[t.length - 1] instanceof Function ? t[t.length - 1] : () => {
     };
-    return Y(i).in(...t);
+    return C(i).in(...t);
   }
   mounted() {
     this.listeners.forEach((t) => t(this));
   }
   get process() {
-    return Math.round(Math.abs(-this.topValue / this.totalHeight) * 1e3) / 1e3;
+    return this.totalHeight ? Math.round(Math.abs(-this.topValue / this.totalHeight) * 1e3) / 1e3 : 0;
   }
   onMounted(t) {
     this.listeners.push(t);
   }
   setTotalHeight() {
-    this.totalHeight = this.firstChildren.getBoundingClientRect().height - window.innerHeight;
+    if (this.totalHeight = this.firstChildren.getBoundingClientRect().height - window.innerHeight, !this.totalHeight)
+      throw "totalHeight can not be 0";
   }
   setUpFirstChildren() {
     if (!this.root.children.length)
@@ -199,15 +203,16 @@ class c {
       this.topValue = i, this.updateChildTop(this.topValue), this.onScroll.dispatch({ process: this.process, value: this.topValue });
       for (const e of this.onUpdates)
         e(this);
+      c.updateDebug();
     }
   }
   mobile() {
-    this.root.addEventListener("touchstart", w.bind(this)), this.root.addEventListener("touchmove", v.bind(this)), this.root.addEventListener("touchend", y.bind(this));
+    this.root.addEventListener("touchstart", m.bind(this)), this.root.addEventListener("touchmove", v.bind(this)), this.root.addEventListener("touchend", y.bind(this));
   }
   update(t) {
     t.preventDefault(), t.stopPropagation();
     const i = t.deltaY;
-    this.move(i), c.updateDebug();
+    this.move(i);
   }
   onUpdate(t) {
     this.onUpdates.push(t);

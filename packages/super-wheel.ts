@@ -2,10 +2,12 @@ type Option = {
     onMounted?: Function
 }
 import { touchStart, touchMove, touchEnd, getTouchDeltaY } from './touch'
-import { scrollEffect, onScroll } from './on-scroll'
+import { scrollEffect, onScroll, SizeMap, sizeMap, is } from './on-scroll'
+type OnResizeCallBack = (payload: { is: Function; process: number }) => void
 export default class SuperWheel {
     static instance?: SuperWheel | null
     static debugEl?: HTMLElement | null
+    static onResizeListeners: OnResizeCallBack[]
     root: HTMLElement
     trap: HTMLElement
     firstChildren: HTMLElement
@@ -50,7 +52,10 @@ export default class SuperWheel {
 
         this.totalHeight = 0
 
-        window.addEventListener('resize', this.setupRoot.bind(this))
+        window.addEventListener('resize', () => {
+            this.setupRoot()
+            SuperWheel.onResizeListeners.forEach(cb => cb({ is, process: this.process }))
+        })
 
         this.getTouchDeltaY = getTouchDeltaY.bind(this)
         this.listeners = []
@@ -67,10 +72,9 @@ export default class SuperWheel {
 
     static updateDebug() {
         if (this.debugEl) {
-            this.debugEl.textContent = SuperWheel.getInstance().process.toFixed(5)
+            this.debugEl.textContent = SuperWheel.getInstance().process.toFixed(3)
         }
     }
-    
 
     static getInstance() {
         if (!SuperWheel.instance) {
@@ -88,12 +92,10 @@ export default class SuperWheel {
     }
 
     static in<T>(...params: T[]) {
-        const cb: Function = params[params.length - 1] instanceof Function
-            ? (params[params.length - 1] as Function)
-            : () => { }
-        
-        return scrollEffect(cb)
-            .in(...params)
+        const cb: Function =
+            params[params.length - 1] instanceof Function ? (params[params.length - 1] as Function) : () => {}
+
+        return scrollEffect(cb).in(...params)
     }
 
     mounted() {
@@ -101,6 +103,7 @@ export default class SuperWheel {
     }
 
     get process(): number {
+        if (!this.totalHeight) return 0
         return Math.round(Math.abs(-this.topValue / this.totalHeight) * 1000) / 1000
     }
 
@@ -110,6 +113,9 @@ export default class SuperWheel {
 
     setTotalHeight() {
         this.totalHeight = this.firstChildren.getBoundingClientRect().height - window.innerHeight
+        if (!this.totalHeight) {
+            throw 'totalHeight can not be 0'
+        }
     }
 
     setUpFirstChildren() {
@@ -152,6 +158,7 @@ export default class SuperWheel {
         /* for (const element of this.fadeElements) {
             element.update(this.topValue)
         } */
+        SuperWheel.updateDebug()
     }
 
     mobile() {
@@ -168,7 +175,6 @@ export default class SuperWheel {
 
         const distance = e.deltaY
         this.move(distance)
-        SuperWheel.updateDebug()
     }
 
     onUpdate(callback: Function) {
@@ -185,5 +191,9 @@ export default class SuperWheel {
         // this.fadeElements.forEach(fade => fade.clearUp())
         this.onUpdates = []
         this.updateChildTop(0)
+    }
+
+    static onResize(cb: OnResizeCallBack) {
+        SuperWheel.onResizeListeners.push(cb)
     }
 }
