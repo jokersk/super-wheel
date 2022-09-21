@@ -7,7 +7,7 @@ type OnResizeCallBack = (payload: { is: Function; process: number }) => void
 export default class SuperWheel {
     static instance?: SuperWheel | null
     static debugEl?: HTMLElement | null
-    static onResizeListeners: OnResizeCallBack[]
+    static onResizeListeners: OnResizeCallBack[] = []
     root: HTMLElement
     trap: HTMLElement
     firstChildren: HTMLElement
